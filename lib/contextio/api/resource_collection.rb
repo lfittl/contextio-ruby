@@ -103,7 +103,11 @@ class ContextIO
       # @param [String] key The Provider Consumer Key for the
       #   provider you want to interact with.
       def [](key)
-        resource_class.new(api, resource_class.primary_key => key)
+        # Copy the value of belongs_to associations into the child, to avoid
+        # an infinite loop when child tries to build a URL (this is mostly for account)
+        options = Hash[self.class.associations.map {|asc| [asc, instance_variable_get("@#{asc}")].flatten }]
+        options[resource_class.primary_key] = key
+        resource_class.new(api, options)
       end
 
       private
