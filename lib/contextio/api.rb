@@ -128,13 +128,18 @@ class ContextIO
     #
     # @return [Net::HTTP*] The response object from the request.
     def oauth_request(method, resource_path, params, headers=nil)
+      start_time = Time.now
       headers ||= { 'Accept' => 'application/json', 'User-Agent' => user_agent_string }
 
       if %w(put post).include? method.to_s.downcase
-        token.request(method, path(resource_path), params, headers)
+        res = token.request(method, path(resource_path), params, headers)
       else # GET, DELETE, HEAD, etc.
-        token.request(method, path(resource_path, params), headers)
+        res = token.request(method, path(resource_path, params), headers)
       end
+      
+      Rails.logger.debug("ContextIO: %s %s %s (%.2fs)" % [method.upcase, resource_path, params, Time.now - start_time]) if defined?(Rails)
+      
+      res
     end
 
     # So that we can accept full URLs, this strips the domain and version number
