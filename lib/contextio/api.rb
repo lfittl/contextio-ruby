@@ -96,6 +96,8 @@ class ContextIO
       if response.code =~ /[45]\d\d/
         if results.is_a?(Hash) && results['type'] == 'error'
           message = results['value']
+        elsif results.is_a?(Hash) && !results['success'] && !results['feedback_code'].blank?
+          message = "%s: %s %s" % [response.message, results['feedback_code'], results['connection_log']]
         else
           message = response.message
         end
